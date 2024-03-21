@@ -1,5 +1,8 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
+import * as fs from 'fs'
+
+const firstLetterUppercase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand('extension.findVueComponentUsage', async () => {
@@ -9,7 +12,18 @@ export function activate(context: vscode.ExtensionContext) {
     const filePath = editor.document.fileName;
     if (!filePath.endsWith('.vue')) return;
 
-    const componentName = path.basename(filePath, '.vue');
+    let componentName = firstLetterUppercase(path.basename(filePath, '.vue'));
+
+    // If Nuxt.js project, add path to component name
+    const workspacePath = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath))?.uri.path;
+    if (workspacePath && fs.existsSync(`${workspacePath}/nuxt.config.ts`)) {
+      const path = filePath.split('/');
+
+      const componentsIndex = path.indexOf('components');
+      path.splice(0, componentsIndex + 1).pop();
+
+      componentName = `${firstLetterUppercase(path.join(''))}${componentName}`;
+    }
 
     // Trigger the "Find in Files" functionality
     vscode.commands.executeCommand('workbench.action.findInFiles', {
