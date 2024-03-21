@@ -20,7 +20,8 @@ export function activate(context: vscode.ExtensionContext) {
       const path = filePath.split('/');
 
       const componentsIndex = path.indexOf('components');
-      path.splice(0, componentsIndex + 1).pop();
+      path.splice(0, componentsIndex + 1);
+      path.pop();
 
       componentName = `${firstLetterUppercase(path.join(''))}${componentName}`;
     }
